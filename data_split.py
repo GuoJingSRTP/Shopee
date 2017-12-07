@@ -25,24 +25,24 @@ if __name__ == '__main__':
     ''' set 1: 
     ''' 
     ''' train '''
-    train_startDatetime = '2017-06-19'
-    train_EndDatetime = '2017-07-04'   
+    train_startDatetime = '2017-06-08'
+    train_EndDatetime = '2017-07-12'   
     train_set_1,train_set_1_target = splitdata(train_data,train_startDatetime,train_EndDatetime)
     
     ''' validation '''          
-    validate_StartDatetime = '2017-07-01'
-    validate_EndDatetime = '2017-07-06'  
+    validate_StartDatetime = '2017-08-01'
+    validate_EndDatetime = '2017-08-10'  
     validate_set_1,validate_set_1_target = splitdata(train_data,validate_StartDatetime,validate_EndDatetime)
     
     ''' test '''
-    test_StartDatetime = '2017-07-06'
-    test_EndDatetime = '2017-08-01'  
+    test_StartDatetime = '2017-08-15'
+    test_EndDatetime = '2017-08-17'  
     test_set_1,test_set_1_target = splitdata(train_data,test_StartDatetime,test_EndDatetime)
 
     
     #step 0
     #filter train_data select those users in all data
-    common_users = list(set(train_set_1['userid']) & set(validate_set_1['userid'])) #& set(test_set_1['userid']) 
+    common_users = list(set(train_set_1['userid']) & set(validate_set_1['userid']) & set(test_set_1['userid']) ) #
     def filterByUserid(data,target):
         temp = data.copy()
         temp['target'] = target.values
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         temp = temp[temp['userid'].isin(common_users)]
         data = temp.iloc[:,:-1]
         target = temp.iloc[:,-1]
-        print("After filtering, P:{},N:{}".format(sum(target),data.shape[0]-sum(target)))
+        print("After filtering, P:{},N:{}, N/P:{}".format(sum(target),data.shape[0]-sum(target),(data.shape[0]-sum(target))/sum(target)))
         return data,target
     
     train_set_1,train_set_1_target = filterByUserid(train_set_1,train_set_1_target)
