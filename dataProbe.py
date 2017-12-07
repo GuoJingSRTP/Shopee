@@ -18,3 +18,11 @@ print('# unique vouchers in predit data: {} '.format(len(set(predict_data['promo
 print('# unique vouchers in both train and predict data: {} '.format(len(set(train_data['promotionid_received']).intersection(set(predict_data['promotionid_received'])))))
 
 #print(Counter(train_data['promotionid_received']).items())
+
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2
+plt.figure()
+venn2([set(train_data['userid']),set(predict_data['userid'])],('Users in train','Users in predict'),alpha=0.4)
+plt.savefig('vennPlot.png')
+plt.show()
+
