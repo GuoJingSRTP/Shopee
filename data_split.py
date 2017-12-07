@@ -25,7 +25,7 @@ if __name__ == '__main__':
     ''' set 1: 
     ''' 
     ''' train '''
-    train_startDatetime = '2017-06-08'
+    train_startDatetime = '2017-07-08'
     train_EndDatetime = '2017-07-12'   
     train_set_1,train_set_1_target = splitdata(train_data,train_startDatetime,train_EndDatetime)
     
@@ -53,9 +53,9 @@ if __name__ == '__main__':
         print("After filtering, P:{},N:{}, N/P:{}".format(sum(target),data.shape[0]-sum(target),(data.shape[0]-sum(target))/sum(target)))
         return data,target
     
-    train_set_1,train_set_1_target = filterByUserid(train_set_1,train_set_1_target)
-    validate_set_1,validate_set_1_target = filterByUserid(validate_set_1,validate_set_1_target)
-    test_set_1,test_set_1_target = filterByUserid(test_set_1,test_set_1_target)
+#    train_set_1,train_set_1_target = filterByUserid(train_set_1,train_set_1_target)
+#    validate_set_1,validate_set_1_target = filterByUserid(validate_set_1,validate_set_1_target)
+#    test_set_1,test_set_1_target = filterByUserid(test_set_1,test_set_1_target)
     
     #generate features
     train_set_1_features = generateFeatures.generateFeatureOfData(train_set_1,train_set_1,user_profiles_MY,
