@@ -154,6 +154,9 @@ def generateUserFeatures_p3(query,transactions_MY,voucher_mechanics):
     #x48-x53
     _ = transactions_MY_new.groupby(['userid','voucher_type']).size().reset_index().pivot_table(index='userid',values=0,columns='voucher_type').reset_index()
     output = pd.merge(output,_,how='left',on='userid')
+    for i in range(6):
+        if i not in list(output.columns):
+            output[i] = 0 
     output.rename(columns={0:'x48',1:'x49',2:'x50',3:'x51',4:'x52',5:'x53'},inplace=True)
     
     #x54-x59. x48-x53/x43

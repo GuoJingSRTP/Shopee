@@ -61,9 +61,9 @@ for i in selectList_useTrain:
 #       220,221,222,223,224,225,226,227]
 #selectList= list(map(lambda x: 'x'+str(x),index))
 
-#selectList.append('x11')
-#selectList.append('x192')
-#selectList.append('x11')
+selectList.append('x11')
+selectList.append('x192')
+
 
 
 
@@ -82,8 +82,8 @@ for i in selectList_useTrain:
 #df['score'] = df['score']/df['score'].sum()
 #
 ##select top 50
-#selectList = df.iloc[:10,0].tolist()
-
+#selectList = df.iloc[:50,0].tolist()
+#
 
 model_xgboost = runXGBOOST(Xtrain[selectList],Ytrain,Xvalidate[selectList],Yvalidate,testdata[selectList],target)
 

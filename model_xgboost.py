@@ -18,17 +18,17 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     #params
     params={
             'min_child_weight':100, #xxx
-            'eta':0.02, #0.05-0.3 0.1
-            'max_depth':3, #3-10 xxx 
+            'eta':0.05, #0.05-0.3 0.1
+            'max_depth':8, #3-10 xxx 
             'subsample':0.7, #xxx
             'gamma':1, #xxx
             'colsample_bytree':0.7, #xxx
-            'lambda':1,
+            'lambda':6,
             'alpha':1, 
             'silent':1,
             'verbose_eval':True,
-            'max_delta_step': 1,
-            'scale_pos_weight': 10,
+            'max_delta_step': 30,
+            'scale_pos_weight': 1,
             'objective': 'binary:logistic',
             'eval_metric': ['map'], #auc
             'seed':12
@@ -93,6 +93,10 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     plt.title('test')
     plt.show()
     
+    temp=pd.DataFrame({0:precision,1:recall})
+    print("test f1:{}".format((2*temp[0]*temp[1]/(temp[0]+temp[1])).max()))
+
+
     precision,recall,threshold=precision_recall_curve(Yvalidate,validate_pred)
     plt.figure()
     plt.step(recall, precision, color='b', alpha=0.2,
@@ -107,6 +111,10 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     plt.title('validate')
     plt.show()
     
+    temp=pd.DataFrame({0:precision,1:recall})
+    print("val f1:{}".format((2*temp[0]*temp[1]/(temp[0]+temp[1])).max()))
+
+    
     precision,recall,threshold=precision_recall_curve(Ytrain,train_pred)
     plt.figure()
     plt.step(recall, precision, color='b', alpha=0.2,
@@ -120,9 +128,13 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     plt.xlim([0.0, 1.0])
     plt.title('train')
     plt.show()
+    
+    temp=pd.DataFrame({0:precision,1:recall})
+    print("train f1:{}".format((2*temp[0]*temp[1]/(temp[0]+temp[1])).max()))
+
 
     
-    print('Recall:{},Precision:{}'.format(recall,precision))
+    #print('Recall:{},Precision:{}'.format(recall,precision))
     
     roc = roc_auc_score(Ytrain,train_pred)
     print('AUC on train:{}'.format(roc))
