@@ -4,6 +4,7 @@ Created on Tue Dec  5 17:09:28 2017
 
 @author: pro3
 """
+import operator
 
 #,Ytrain_new
 selectList = manualSelect()
@@ -33,5 +34,14 @@ for n in range(1,200,10):
     print(sum(df.sort_values(by='score',ascending=False)['score'][:n]))
 
 
+#select features by importance
+importance = model_xgboost.get_fscore()
+importance = sorted(importance.items(),key=operator.itemgetter(1),reverse=True)
 
-
+df=pd.DataFrame(importance,columns=['name','score'])
+df['score'] = df['score']/df['score'].sum()
+print(df.sort_values(by='score',ascending=False)['name'].head(30))
+for n in range(1,200,10):
+    print(n)
+    print(sum(df.sort_values(by='score',ascending=False)['score'][:n]))
+c=df.sort_values(by='score',ascending=False)['name'].head(50).tolist()

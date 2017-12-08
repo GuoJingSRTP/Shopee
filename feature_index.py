@@ -6,7 +6,7 @@ Created on Thu Dec  7 19:30:14 2017
 """
 
 def manualSelect():
-#    selected =[4,11,
+#    selected =[4,192,
 #               33,34,35,36,
 #               54,55,56,57,58,59,
 #               77,78,79,80,81,82,
@@ -14,18 +14,18 @@ def manualSelect():
 #               100,101,102,103,104,105,
 #               115,116,117,118,119,120,
 #               149,150,151,152,153,154,
-#               191,192
-#               ]#11,12,32,31,
-    selected =[11,
-               191,192,
-               297,298,299,300,398,244,241
-               ]#11,12,32,31,           
+#               191
+#               ]#11,12,32,31,11,,192
+    selected =[4,11,102,115,
+               93,192,33,117
+               ]#11,12,32,31, 11,    ,244,241      
     
     temp=['x'+str(i) for i in selected]
+#    temp=[]
     for i in range(228,297):
         temp.append('x'+str(i))
-#    for i in range(396,399):
-#        temp.append('x'+str(i))
+    for i in range(396,399):
+        temp.append('x'+str(i))
     return temp
 
 
@@ -44,7 +44,8 @@ def RemoveTrain(Xtrain):
            387,388,389,390,391,392,393,394,395,399,400,401,402,403] #
     selectList_useTrain= list(map(lambda x: 'x'+str(x),index))
     for i in selectList_useTrain:
-        selectList.remove(i) 
+        if i in selectList:
+            selectList.remove(i) 
     return selectList
 
 

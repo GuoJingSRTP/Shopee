@@ -35,7 +35,7 @@ def generateUserFeatures_p1(query,user_profiles_MY,Timecolname='voucher_received
     output['x3'] = output[Timecolname]-output['datetime']
     output['x3'] = output['x3'].apply(lambda x: x.days)
     
-    return output[['x1','x2','x3','x4','x5','x6','x7']] #same as query
+    return output[['userid','x1','x2','x3','x4','x5','x6','x7']] #same as query
 
 
 
@@ -1193,18 +1193,24 @@ def generateFeatureOfData(query,train_set,user_profiles_MY,voucher_mechanics,tra
     print(p9.shape)
     print('Run p10...')
     p10 = generateUserFeatures_p10(query,view_log_0)
+    print(p10.shape)
     print('Run p11...')
     p11 = generateUserFeatures_p11(query,voucher_distribution_active_date)
-    print(p10.shape)
+    print(p11.shape)
     print('Run p12...')
     p12 = generateUserFeatures_p12(query,transactions_MY,voucher_mechanics)
     print(p12.shape)
     print('Run p13...')
     p13 = generateUserFeatures_p13(query,transactions_MY,voucher_mechanics)
     print(p13.shape)
-
-    features = pd.concat([p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13],axis=1)
-
+    
+    features = pd.concat([p1.reset_index(drop=True),p2.reset_index(drop=True),
+                          p3.reset_index(drop=True),p4.reset_index(drop=True),
+                          p5.reset_index(drop=True),p6.reset_index(drop=True),
+                          p7.reset_index(drop=True),p8.reset_index(drop=True),
+                          p9.reset_index(drop=True),p10.reset_index(drop=True),
+                          p11.reset_index(drop=True),p12.reset_index(drop=True),p13],axis=1)
+        
     return features
  
     
