@@ -12,10 +12,11 @@ from model_test import modelTest
 from model_LR import runLR
 from sklearn.model_selection import train_test_split
 import pandas as pd
+from feature_index import manualSelect,RemoveTrain,allCol,removeSpecificFeatures
+
 from imblearn.datasets import make_imbalance
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.combine import SMOTETomek,SMOTEENN
-from feature_index import manualSelect,RemoveTrain,allCol,removeSpecificFeatures
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import NeighbourhoodCleaningRule,RandomUnderSampler
 
@@ -50,15 +51,9 @@ def normalizationMinMaxScale(dataset,target,ifsplit=0):
 #Xtrain,_,_,Ytrain,_,_ = normalizationMinMaxScale(dataset,target,ifsplit=0)
 #Xtrain=Xtrain.iloc[:,2:]
 #Ytrain=Ytrain[1]
-##
-##Xtest=Xtest.iloc[:,2:]
-##Ytest=Ytest[1]
-##
-##Xvalidate=Xvalidate.iloc[:,2:]
-##Yvalidate=Yvalidate[1]
 #
-#test_dataset = pd.read_csv('test_set_1_features_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
-#test_target = pd.read_csv('test_set_1_target_2017-08-10_2017-08-16.csv',header=None) #train_set_target #
+#test_dataset = pd.read_csv('test_set_2_features_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
+#test_target = pd.read_csv('test_set_2_target_2017-08-10_2017-08-16.csv',header=None) #train_set_target #
 #testdata,_,_,target,_,_ = normalizationMinMaxScale(test_dataset,test_target)
 #testdata=testdata.iloc[:,2:]
 #target=target[1]
@@ -86,29 +81,30 @@ print('Feature...')
 #selectList = allCol(Xtrain)
 
 #selectList.append('x192')
-selectList = manualSelect() + selectList
-#selectList=removeSpecificFeatures(selectList)
-#selectList = RemoveTrain(Xtrain)
-#selectList = manualSelect()
-#
-#
+#selectList = manualSelect() + selectList
+##selectList=removeSpecificFeatures(selectList)
+##selectList = RemoveTrain(Xtrain)
+##selectList = manualSelect()
+##
+##
 selectList=list(set(selectList))
-selectList.remove('x11')
+#selectList.remove('x11')
 
 
 ''' balance data '''
-Xtrain_new=Xtrain
-Ytrain_new=Ytrain
+#Xtrain_new=Xtrain
+#Ytrain_new=Ytrain
+#
+#
+### the most stupid balance method.... lose the information in negative samples
+#temp = Xtrain.copy()
+#temp['target'] = Ytrain.values
+#temp = pd.concat([temp[temp['target']==0].sample(n=int(sum(Ytrain)*8)),temp[temp['target']==1]])
+#Xtrain_new = temp.iloc[:,:-1]
+#Ytrain_new = temp.iloc[:,-1]
 
-temp = Xtrain.copy()
-temp['target'] = Ytrain.values
-temp = pd.concat([temp[temp['target']==0].sample(n=sum(Ytrain)*30),temp[temp['target']==1]])
-Xtrain_new = temp.iloc[:,:-1]
-Ytrain_new = temp.iloc[:,-1]
 
-#ratio = {0: 10, 1: 10}
-#X, y = make_imbalance(iris.data, iris.target, ratio=ratio)
-
+#''' time consuming '''
 #sm = SMOTETomek()
 #Xtrain_new, Ytrain_new = sm.fit_sample(Xtrain[selectList], Ytrain)
 
@@ -124,6 +120,8 @@ Ytrain_new = temp.iloc[:,-1]
 #for i in df.iloc[:1,0].tolist():
 #    selectList.remove(i)
 
+
+# all negative samples
 #temp=Xtrain.copy()
 #temp['target']=Ytrain.values
 #temp = pd.concat([temp[temp['target']==0],temp[temp['target']==1].sample(n=1)])
@@ -137,17 +135,16 @@ Ytrain_new = temp.iloc[:,-1]
 ''' train model '''
 #params
 params={
-        'min_child_weight':10, #xxx
-        'eta':0.2, #0.05-0.3 0.1
+        'eta':0.1, #0.05-0.3 0.1
         'max_depth':3, #3-10 xxx 
-        'subsample':0.5, #xxx
+        'subsample':0.3, #xxx
         'gamma':10, #xxx
         'colsample_bytree':0.3, #xxx
-        'lambda':30,
+        'lambda':1,
         'alpha':1, 
         'silent':1,
         'verbose_eval':True,
-        'max_delta_step': 10,
+        'max_delta_step': 8,
         'scale_pos_weight': 1,
         'objective': 'binary:logistic',
         'eval_metric': ['map'], #auc
@@ -161,9 +158,11 @@ print('Train...')
 model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
                            target,testdata[selectList],target,
                            opt_param)
+#opt_param
 
-#model_LR = runLR(Xtrain_new[selectList],Ytrain_new,Xvalidate[selectList],
-#                           Yvalidate,testdata[selectList],target)
+#model_LR = runLR(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
+#                           target,testdata[selectList],target)
+
 #model_rf = runRandomForest(Xtrain_new[selectList],Ytrain_new,Xvalidate[selectList],Yvalidate,testdata[selectList],target)
 
 #model_GBDT = runGBDT(Xtrain[selectList],Ytrain,Xvalidate[selectList],Yvalidate,testdata[selectList],target)
@@ -174,14 +173,15 @@ model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectL
 ''' predict '''
 #modelTest(model_rf,predict_dataset[selectList],target_name='used')
 
+#modelTest(model_xgboost,predict_dataset[selectList],target_name='used')
+
+#modelTest(model_xgboost,testdata[selectList],target_name='used')
 
 
 
-
-
+''' param tuning '''
 #max_f1=0
 #opt_param={}
-#''' param tuning '''
 #import itertools
 #
 #params['scale_pos_weight'] = 30
@@ -201,17 +201,13 @@ model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectL
 #    model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
 #                           target,testdata[selectList],target,
 #                           params)
+#    print(f1)
 #    if f1>max_f1:
+#        max_f1=f1
 #        opt_param=params
-#        
-##    input()
+        
+#    input()
 
 
-
-
-
-#rank=pd.DataFrame({'name':Xtrain.columns,'score':model_rf.feature_importances_})
-#rank.sort_values(by='score',ascending=False,inplace=True)
-#rank['score'] = rank['score']/rank['score'].sum()
 
 
