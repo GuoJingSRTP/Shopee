@@ -96,7 +96,8 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     plt.show()
     
     temp=pd.DataFrame({0:precision,1:recall})
-    print("test f1:{}".format((2*temp[0]*temp[1]/(temp[0]+temp[1])).max()))
+    f1=(2*temp[0]*temp[1]/(temp[0]+temp[1])).max()
+    print("test f1:{}".format(f1))
 
 
     precision,recall,threshold=precision_recall_curve(Yvalidate,validate_pred)
@@ -148,5 +149,5 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     print('AUC on test:{}'.format(roc))
     
 
-    return model
+    return model,f1
     

@@ -158,9 +158,9 @@ params={
 
 
 print('Train...')
-model_xgboost = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
+model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
                            target,testdata[selectList],target,
-                           params)
+                           opt_param)
 
 #model_LR = runLR(Xtrain_new[selectList],Ytrain_new,Xvalidate[selectList],
 #                           Yvalidate,testdata[selectList],target)
@@ -179,8 +179,9 @@ model_xgboost = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList
 
 
 
-
-''' param tuning '''
+#max_f1=0
+#opt_param={}
+#''' param tuning '''
 #import itertools
 #
 #params['scale_pos_weight'] = 30
@@ -197,10 +198,13 @@ model_xgboost = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList
 #    params['max_depth'] = d
 #    params['min_child_weight'] = cw
 #    params['gamma'] = g
-#    model_xgboost = runXGBOOST(Xtrain[selectList],Ytrain,Xvalidate[selectList],
-#                           Yvalidate,testdata[selectList],target,
+#    model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
+#                           target,testdata[selectList],target,
 #                           params)
-#    input()
+#    if f1>max_f1:
+#        opt_param=params
+#        
+##    input()
 
 
 
