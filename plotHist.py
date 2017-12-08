@@ -6,8 +6,9 @@ Created on Tue Dec  5 17:09:28 2017
 """
 
 #,Ytrain_new
-temp = Xvalidate[selectList]
-temp['target'] = Yvalidate.values
+selectList = manualSelect()
+temp = testdata[selectList]
+temp['target'] = target.values
     
 for i in temp.columns:
     featureid=i
@@ -16,11 +17,20 @@ for i in temp.columns:
     plt.figure(1)
     plt.hist(temp[temp['target']==0][featureid],bins=10)
     plt.figure(1)
-    plt.hist(temp[temp['target']==1][featureid],bins=10,color='r',alpha=0.1)
+    plt.hist(temp[temp['target']==1][featureid],bins=10,color='r',alpha=1)
     plt.show()
     
     input()
     
+
+
+importance = model_rf.feature_importances_
+df=pd.DataFrame({'score':importance,'name':selectList})
+df['score'] = df['score'].apply(np.abs)
+print(df.sort_values(by='score',ascending=False)['name'].head(30))
+for n in range(1,200,10):
+    print(n)
+    print(sum(df.sort_values(by='score',ascending=False)['score'][:n]))
 
 
 

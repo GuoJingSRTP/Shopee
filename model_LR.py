@@ -5,71 +5,52 @@ Created on Wed Nov 29 19:39:19 2017
 @author: GUOJ0020
 """
 
-#from sklearn.model_selection import train_test_split
-#from sklearn.preprocessing import MinMaxScaler,PolynomialFeatures
-#
-#
-#train_voucher_mechanics1 = pd.concat([train_voucher_mechanics[train_voucher_mechanics['used?']==0].sample(frac=0.03),train_voucher_mechanics[train_voucher_mechanics['used?']==1]])
-#data=train_voucher_mechanics1[['discount','max_value','used?']]
-#
-##data=train_voucher_mechanics[['discount','max_value','used?']]
-#
-#
-##data=train_voucher_mechanics[train_voucher_mechanics['used?']==0][['discount','max_value','used?']]
-#
-#Xtrain,Xtest,Ytrain,Ytest = train_test_split(data[['discount','max_value']],data['used?'],test_size=0.4)
-#Xtest,Xvalidate,Ytest,Yvalidate= train_test_split(Xtest,Ytest,test_size=0.5)
-##Xtest,Ytest = train_voucher_mechanics[train_voucher_mechanics['used?']==1][['discount','max_value']],train_voucher_mechanics[train_voucher_mechanics['used?']==1][['used?']]
-#
-#
-#scaler = MinMaxScaler()
-#norm_Xtrain = scaler.fit_transform(Xtrain)
-#norm_Xtest = scaler.transform(Xtest)
-#norm_Xvalidate = scaler.transform(Xvalidate)
 
 ''' linear model '''
 from sklearn.linear_model import Ridge,RidgeClassifier,LinearRegression,LogisticRegression,Lasso
 from sklearn.metrics import mean_absolute_error,mean_squared_error,confusion_matrix,roc_auc_score,recall_score,precision_score,accuracy_score,f1_score
 from sklearn.model_selection import cross_val_score
+import pandas as pd
+
+def runLR(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
+    linear = LogisticRegression(C=100,class_weight='balanced').fit(Xtrain,Ytrain)
+    yprob = linear.predict(Xtest)
+    
+    
+    print("val cv:{}".format(cross_val_score(linear, Xvalidate, Yvalidate, cv=5, scoring='f1')))
+    
+    
+    con = confusion_matrix(Ytest,yprob)
+    print("test con:{}".format(con))
+    recall=recall_score(Ytest,yprob)
+    precision=precision_score(Ytest,yprob)
+    f1=f1_score(Ytest,yprob)
+    roc = roc_auc_score(Ytest,yprob)
+    print("test R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
+    
+    
+    yprob = linear.predict(Xvalidate)
+    recall=recall_score(Yvalidate,yprob)
+    precision=precision_score(Yvalidate,yprob)
+    f1=f1_score(Yvalidate,yprob)
+    roc = roc_auc_score(Yvalidate,yprob)
+    print("val R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
+    
+    yprob = linear.predict(Xtrain)
+    recall=recall_score(Ytrain,yprob)
+    precision=precision_score(Ytrain,yprob)
+    f1=f1_score(Ytrain,yprob)
+    roc = roc_auc_score(Ytrain,yprob)
+    print("train R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
+    
+    importance = linear.coef_[0]
+    importance = sorted(importance,reverse=True)
+    df=pd.DataFrame({'score':importance,'name':Xtrain.columns.tolist()})
+    df['score'] = df['score'].apply(np.abs)
+    print(df.sort_values(by='score',ascending=False)['name'].head(10))
 
 
-
-linear = LogisticRegression(C=10,class_weight='balanced').fit(Xtrain_new[selectList],Ytrain_new)
-yprob = linear.predict(Xtest[selectList])
-
-
-print(cross_val_score(linear, Xvalidate[selectList], Yvalidate, cv=5, scoring='f1'))
-
-
-con = confusion_matrix(Ytest,yprob)
-print(con)
-recall=recall_score(Ytest,yprob)
-precision=precision_score(Ytest,yprob)
-f1=f1_score(Ytest,yprob)
-roc = roc_auc_score(Ytest,yprob)
-print("test R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
-
-
-yprob = linear.predict(Xvalidate[selectList])
-recall=recall_score(Yvalidate,yprob)
-precision=precision_score(Yvalidate,yprob)
-f1=f1_score(Yvalidate,yprob)
-roc = roc_auc_score(Yvalidate,yprob)
-print("val R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
-
-yprob = linear.predict(Xtrain[selectList])
-recall=recall_score(Ytrain,yprob)
-precision=precision_score(Ytrain,yprob)
-f1=f1_score(Ytrain,yprob)
-roc = roc_auc_score(Ytrain,yprob)
-print("train R:{},P:{},f1:{},auc:{}".format(recall,precision,f1,roc))
-
-importance = linear.coef_[0]
-importance = sorted(importance,reverse=True)
-df=pd.DataFrame({'score':importance,'name':selectList})
-df['score'] = df['score'].apply(np.abs)
-print(df.sort_values(by='score',ascending=False)['name'].head(10))
-
+    return linear
 
 ''' learning curve '''
 import matplotlib.pyplot as plt

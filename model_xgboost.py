@@ -60,6 +60,7 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     df=pd.DataFrame(importance,columns=['name','score'])
     df['score'] = df['score']/df['score'].sum()
     
+    
     plt.figure()
     df.plot(kind='barh',x='name',y='score',legend=False)
     plt.show()

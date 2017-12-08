@@ -6,22 +6,26 @@ Created on Thu Dec  7 19:30:14 2017
 """
 
 def manualSelect():
-    selected =[4,11,
-               31,32,33,34,35,36,
-               54,55,56,57,58,59,
-               77,78,79,80,81,82,
-               93,
-               100,101,102,103,104,105,
-               115,116,117,118,119,120,
-               149,150,151,152,153,154,
-               191,192
-               ]#11,12,
+#    selected =[4,11,
+#               33,34,35,36,
+#               54,55,56,57,58,59,
+#               77,78,79,80,81,82,
+#               93,
+#               100,101,102,103,104,105,
+#               115,116,117,118,119,120,
+#               149,150,151,152,153,154,
+#               191,192
+#               ]#11,12,32,31,
+    selected =[11,
+               191,192,
+               297,298,299,300,398,244,241
+               ]#11,12,32,31,           
     
     temp=['x'+str(i) for i in selected]
-    for i in range(233,304):
+    for i in range(228,297):
         temp.append('x'+str(i))
-    for i in range(396,399):
-        temp.append('x'+str(i))
+#    for i in range(396,399):
+#        temp.append('x'+str(i))
     return temp
 
 
@@ -44,9 +48,17 @@ def RemoveTrain(Xtrain):
     return selectList
 
 
+def removeSpecificFeatures(selectList):
+    for i in range(305,396):
+        t = 'x'+str(i)
+        if t in selectList:
+            selectList.remove(t) 
+    for i in range(399,404):
+        t = 'x'+str(i)
+        if t in selectList:
+            selectList.remove(t) 
 
-
-    
+    return selectList
     
 #     rate features using used? in train
 #    index=[11,12,

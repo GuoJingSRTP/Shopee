@@ -47,7 +47,7 @@ if __name__ == '__main__':
     startDatetime = '2017-08-10'
     endDatetime = '2017-08-16'
     predict_set,predict_set_target = splitdata(predict_data,startDatetime,endDatetime)
-    
+        
 
     #step 0
     #filter train_data select those users in all data
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     predict_features.replace(np.inf,0,inplace=True)
     predict_features.replace(np.nan,0,inplace=True)
     predict_features.to_csv('predict_features_'+startDatetime+'_'+str(endDatetime)+'.csv')
-    predict_set_target.to_csv('predict_target_'+startDatetime+'_'+str(endDatetime)+'.csv')
+    #predict_set_target.to_csv('predict_target_'+startDatetime+'_'+str(endDatetime)+'.csv')
      
     
 

@@ -26,7 +26,7 @@ def runRandomForest(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     # parameters
     n_estimators = 200
     max_features = 10
-    max_depth = 3
+    max_depth = 5
     min_samples_leaf = 3
     max_leaf_nodes = None
     min_samples_split = 2
@@ -47,6 +47,8 @@ def runRandomForest(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     plt.figure()
     rank.plot(kind='barh',x='name',y='score',legend=False)
     plt.show()
+    
+    print(rank.sort_values(by='score',ascending=False)['name'].head(10))
     
     
     #predict
