@@ -14,26 +14,27 @@ import operator
 from sklearn.metrics import precision_recall_curve,mean_absolute_error,mean_squared_error,confusion_matrix,roc_auc_score,recall_score,precision_score,accuracy_score,f1_score
 from sklearn.model_selection import cross_val_score
 
-def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
-    #params
-    params={
-            'min_child_weight':100, #xxx
-            'eta':0.05, #0.05-0.3 0.1
-            'max_depth':8, #3-10 xxx 
-            'subsample':0.7, #xxx
-            'gamma':1, #xxx
-            'colsample_bytree':0.7, #xxx
-            'lambda':6,
-            'alpha':1, 
-            'silent':1,
-            'verbose_eval':True,
-            'max_delta_step': 30,
-            'scale_pos_weight': 1,
-            'objective': 'binary:logistic',
-            'eval_metric': ['map'], #auc
-            'seed':12
-            }
-    
+
+def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
+#    #params
+#    params={
+#            'min_child_weight':100, #xxx
+#            'eta':0.1, #0.05-0.3 0.1
+#            'max_depth':8, #3-10 xxx 
+#            'subsample':0.7, #xxx
+#            'gamma':1, #xxx
+#            'colsample_bytree':0.7, #xxx
+#            'lambda':10,
+#            'alpha':10, 
+#            'silent':1,
+#            'verbose_eval':True,
+#            'max_delta_step': 10,
+#            'scale_pos_weight': 1,
+#            'objective': 'binary:logistic',
+#            'eval_metric': ['map'], #auc
+#            'seed':12
+#            }
+#    
     num_boost_round=100
     early_stopping_rounds=20
     

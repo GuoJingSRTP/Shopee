@@ -10,82 +10,148 @@ from model_GBDT import runGBDT
 from model_xgboost import runXGBOOST
 from model_test import modelTest
 from sklearn.model_selection import train_test_split
+import pandas as pd
+from imblearn.datasets import make_imbalance
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.combine import SMOTETomek,SMOTEENN
+from feature_index import manualSelect,RemoveTrain,allCol
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import NeighbourhoodCleaningRule,RandomUnderSampler
+
+
 
 def normalizationMinMaxScale(dataset,target):
-    norm_data=(dataset-dataset.min()+1)/(dataset.max()-dataset.min()+1)
+    #norm_data=(dataset-dataset.min()+0.001)/(dataset.max()-dataset.min()+0.001)
+    norm_data = dataset.copy()
+    for col in dataset.columns:
+        norm_data[col] = (dataset[col] - dataset[col].mean())/dataset[col].std(ddof=0)
     #norm_data=dataset
-    Xtrain,Xtest,Ytrain,Ytest = train_test_split(norm_data,target,test_size=0.2)
+#    Xtrain,Xtest,Ytrain,Ytest = train_test_split(norm_data,target,test_size=0.2)
+    Xtrain=norm_data
+    Ytrain=target
+    Xtest= 1
+    Ytest=1
     return Xtrain,Xtest,Ytrain,Ytest
 
 
-
-dataset = train_set_1_features #
-target = train_set_1_target #
-Xtrain,Xtest,Ytrain,Ytest = normalizationMinMaxScale(dataset,target)
-
-
-test_dataset = test_set_1_features #train_features #
-test_target = test_set_1_target #train_set_target #
-testdata,Xtest,target,Ytest = normalizationMinMaxScale(test_dataset,test_target)
-
-validate_dataset = validate_set_1_features #train_features #
-validate_target = validate_set_1_target #train_set_target #
-Xvalidate,_,Yvalidate,_ = normalizationMinMaxScale(validate_dataset,validate_target)
-
-
+#print('loadData...')
+#dataset = pd.read_csv('train_set_1_features_2017-04-01_2017-07-05.csv') #train_set_1_features #
+#target = pd.read_csv('train_set_1_target_2017-04-01_2017-07-05.csv',header=None) #train_set_1_target #
+#Xtrain,Xtest,Ytrain,Ytest = normalizationMinMaxScale(dataset,target)
+#Ytrain=Ytrain[1]
+#
+#test_dataset = pd.read_csv('test_set_1_features_2017-08-01_2017-08-16.csv') #test_set_1_features #train_features #
+#test_target = pd.read_csv('test_set_1_target_2017-08-01_2017-08-16.csv',header=None) #train_set_target #
+#testdata,Xtest,target,Ytest = normalizationMinMaxScale(test_dataset,test_target)
+#target=target[1]
+#
+#validate_dataset = pd.read_csv('validate_features_set_1_2017-07-06_2017-07-10.csv') #validate_set_1_features #train_features #
+#validate_target = pd.read_csv('validate_target_set_1_2017-07-06_2017-07-10.csv',header=None) #validate_set_1_target #train_set_target #
+#Xvalidate,_,Yvalidate,_ = normalizationMinMaxScale(validate_dataset,validate_target)
+#Yvalidate=Yvalidate[1]
+#
+#Xtrain.fillna(0,inplace=True)
+#testdata.fillna(0,inplace=True)
+#Xvalidate.fillna(0,inplace=True)
 ##############################################################################
+print('Feature...')
 
 
+selectList = allCol(Xtrain)
 
-#selectList=['x1','x2','x3','x4', #P1
-#            'x8','x9','x11','x12',
-#            'x297','x303','x300','x396','x397','x398',
-#            'x43','x44','x89','x187','x188','x189','x93','x69']
-#selectList=['x8','x9','x10','x11','x31','x32','x33','x34','x35','x36']
-selectList=['x43','x44','x45','x46','x47','x48','x53','x54','x59','x60']
+#selectList = RemoveTrain(Xtrain)
+#selectList = manualSelect()
 
-selectList = Xtrain.columns.tolist()
-#selectList.remove('x8')
-
-index=[8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
-       33,34,35,36,37,38,39,40,41,42,187,188,189,190,191,192,193,194,195,196,197,
-       198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,
-       216,217,218,219,220,221,222,223,224,225,226,227,305,306,307,384,385,386,
-       387,388,389,390,391,392,393,394,399,400,401,402,403] #395
-selectList_useTrain= list(map(lambda x: 'x'+str(x),index))
-for i in selectList_useTrain:
-    selectList.remove(i) 
-
-#index=[4,11,31,32,33,34,35,36,187,191,192,193,194,195,196,197,198,199,200,201,
-#       202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,
-#       220,221,222,223,224,225,226,227]
-#selectList= list(map(lambda x: 'x'+str(x),index))
-
-selectList.append('x11')
-selectList.append('x192')
-
-
-
-
-#balance data
-#temp = Xtrain.copy()
-#temp['target'] = Ytrain.values
-#temp = pd.concat([temp[temp['target']==0].sample(n=sum(Ytrain)*5),temp[temp['target']==1]])
-#Xtrain_new = temp.iloc[:,:-1]
-#Ytrain_new = temp.iloc[:,-1]
-
-
+##select features by importance
 #importance = model_xgboost.get_fscore()
 #importance = sorted(importance.items(),key=operator.itemgetter(1),reverse=True)
 #
 #df=pd.DataFrame(importance,columns=['name','score'])
 #df['score'] = df['score']/df['score'].sum()
-#
 ##select top 50
 #selectList = df.iloc[:50,0].tolist()
-#
 
-model_xgboost = runXGBOOST(Xtrain[selectList],Ytrain,Xvalidate[selectList],Yvalidate,testdata[selectList],target)
+
+#balance data
+#temp = Xtrain.copy()
+#temp['target'] = Ytrain.values
+#temp = pd.concat([temp[temp['target']==0].sample(n=sum(Ytrain)*1),temp[temp['target']==1]])
+#Xtrain_new = temp.iloc[:,:-1]
+#Ytrain_new = temp.iloc[:,-1]
+
+#ratio = {0: 10, 1: 10}
+#X, y = make_imbalance(iris.data, iris.target, ratio=ratio)
+
+#sm = SMOTETomek()
+#Xtrain_new, Ytrain_new = sm.fit_sample(Xtrain[selectList], Ytrain)
+
+#Xtrain.fillna(0,inplace=True)
+#sm=SMOTEENN()
+#sm = SMOTE(kind='regular')
+#Xtrain_new, Ytrain_new = sm.fit_sample(Xtrain[selectList], Ytrain)
+
+#ncl = NeighbourhoodCleaningRule(return_indices=True)
+#rus = RandomUnderSampler(return_indices=True)
+#Xtrain_new, Ytrain_new, idx_resampled = rus.fit_sample(Xtrain[selectList], Ytrain)
+ 
+#for i in df.iloc[:1,0].tolist():
+#    selectList.remove(i)
+
+
+
+#params
+params={
+        'min_child_weight':60, #xxx
+        'eta':0.4, #0.05-0.3 0.1
+        'max_depth':3, #3-10 xxx 
+        'subsample':0.5, #xxx
+        'gamma':50, #xxx
+        'colsample_bytree':0.7, #xxx
+        'lambda':40,
+        'alpha':10, 
+        'silent':1,
+        'verbose_eval':True,
+        'max_delta_step': 10,
+        'scale_pos_weight': 1,
+        'objective': 'binary:logistic',
+        'eval_metric': ['map'], #auc
+        'seed':12
+        }
+
+
+temp=Xtrain.copy()
+temp['target']=Ytrain.values
+Xtrain_new = temp[temp['target']==0].iloc[:,:-1]
+Ytrain_new = temp[temp['target']==0].iloc[:,-1]
+
+model_xgboost = runXGBOOST(Xtrain_new[selectList],Ytrain_new,Xvalidate[selectList],
+                           Yvalidate,testdata[selectList],target,
+                           params)
+
+
+#import itertools
+#
+##param tuning
+#params['scale_pos_weight'] = 30
+#all_etas = [0.01, 0.05, 0.1, 0.15, 0.2]
+#all_subsamples = [0.6, 0.8, 1.0]
+#all_colsample_bytree = [0.6, 0.8, 1.0]
+#all_depth = [6, 7, 8, 9]
+#all_child_weights = [1, 10, 20, 50]
+#all_gamma = [0, 5, 20, 50]
+#for e, s, cb, d, cw, g in list(itertools.product(all_etas, all_subsamples, all_colsample_bytree, all_depth, all_child_weights, all_gamma)):
+#    params['eta'] = e
+#    params['subsample'] = s
+#    params['colsample_bytree'] = cb
+#    params['max_depth'] = d
+#    params['min_child_weight'] = cw
+#    params['gamma'] = g
+#    model_xgboost = runXGBOOST(Xtrain[selectList],Ytrain,Xvalidate[selectList],
+#                           Yvalidate,testdata[selectList],target,
+#                           params)
+#    input()
+
+
 
 #model_rf = runRandomForest(Xtrain[selectList],Ytrain,Xvalidate[selectList],Yvalidate,testdata[selectList],target)
 

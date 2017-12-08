@@ -145,7 +145,7 @@ def generateUserFeatures_p3(query,transactions_MY,voucher_mechanics):
     output = pd.merge(temp1,temp2,how='left',on='userid')
     output = pd.merge(output,temp3,how='left',on='userid')
     output.columns=['userid','x43','x44','x45']
-
+    
     #x46,x47
     output['x46']=output['x44']/output['x43']    
     output['x47']=output['x44']/output['x45']
@@ -215,6 +215,9 @@ def generateUserFeatures_p4(query,transactions_MY,voucher_mechanics):
     #x71-x76
     temp = transactions_MY_new[['userid','total_price','voucher_type']].groupby(['userid','voucher_type']).sum().reset_index().pivot_table(index='userid',values='total_price',columns='voucher_type').reset_index()
     output = pd.merge(output,temp,how='left',on='userid')
+    for i in range(6):
+        if i not in list(output.columns):
+            output[i] = 0 
     output.rename(columns={0:'x71',1:'x72',2:'x73',3:'x74',4:'x75',5:'x76'},inplace=True)
     
     
@@ -256,9 +259,9 @@ def generateUserFeatures_p5(query,transactions_MY,voucher_mechanics):
     
     
     #x89,x90,x91
-    temp1 = transactions_MY_new.groupby(['userid','orderid']).size().reset_index().groupby('userid').size().reset_index()
-    temp2 = transactions_MY_new[pd.notnull(transactions_MY_new['promotionid_used'])].groupby(['userid','orderid']).size().reset_index().groupby('userid').size().reset_index()
-    temp3 = transactions_MY_new[pd.isnull(transactions_MY_new['promotionid_used'])].groupby(['userid','orderid']).size().reset_index().groupby('userid').size().reset_index()
+    temp1 = transactions_MY_new.groupby('userid').size().reset_index()
+    temp2 = transactions_MY_new[pd.notnull(transactions_MY_new['promotionid_used'])].groupby('userid').size().reset_index()
+    temp3 = transactions_MY_new[pd.isnull(transactions_MY_new['promotionid_used'])].groupby('userid').size().reset_index()
     
     output = pd.merge(temp1,temp2,how='left',on='userid')
     output = pd.merge(output,temp3,how='left',on='userid')
@@ -272,9 +275,12 @@ def generateUserFeatures_p5(query,transactions_MY,voucher_mechanics):
     #x94-x99
     temp = transactions_MY_new.groupby(['userid','voucher_type']).size().reset_index().pivot_table(index='userid',values=0,columns='voucher_type').reset_index()
     output = pd.merge(output,temp,how='left',on='userid')
+    for i in range(6):
+        if i not in list(output.columns):
+            output[i] = 0 
     output.rename(columns={0:'x94',1:'x95',2:'x96',3:'x97',4:'x98',5:'x99'},inplace=True)
     
-    
+        
     #x100-x105. x94-x99/x89
     for i in range(100,106):
         output['x'+str(i)] = output['x'+str(i-6)]/output['x89']
@@ -763,7 +769,7 @@ def generateUserFeatures_p9(query,train_set,voucher_mechanics,colnameDateTime='v
 
 def generateUserFeatures_p10(query,view_log_0,colnameDate='voucher_received_date'): 
     temp = pd.merge(query,view_log_0,how='left',left_on=['userid',colnameDate],
-             right_on=['userid','voucher_received_dateStamp'])
+             right_on=['userid','voucher_received_date'])
     
     #x228,x229,x230,x231,x232
     temp['x228'] = temp['addItemToCart_0'] + temp['trackGenericClick_0']+temp['trackGenericScroll_0']+temp['trackGenericSearchPageView_0']+temp['trackSearchFilterApplied_0']+temp['other_0']
@@ -846,7 +852,7 @@ def generateUserFeatures_p10(query,view_log_0,colnameDate='voucher_received_date
      x296. 20 days # active sessions before x days
 '''
 
-def generateUserFeatures_p11(query,voucher_distribution_active_date,colnameDatetime='voucher_received_datetime'): 
+def generateUserFeatures_p11(query,voucher_distribution_active_date,colnameDatetime='voucher_received_time'): 
     temp = pd.merge(query,voucher_distribution_active_date,how='left',left_on=['userid','promotionid_received',colnameDatetime],
              right_on=['userid','promotionid_received','voucher_received_time'])
     
@@ -943,162 +949,164 @@ def generateUserFeatures_p12(query,transactions_MY,voucher_mechanics,colnameDate
     output['x302'] = output[colnameDatetime].apply(lambda x: x.quarter)
     #x303
     output['x303'] = output['x297'].apply(lambda x: 1 if x>4 else 0)   
-    #x304. isholiday    
-    #x305
-    temp = output.groupby('x300').size().reset_index()
-    output = pd.merge(output,temp,how='left',on='x300')
-    output.rename(columns={0:'x305'},inplace=True)
-    
-    #x306
-    temp = output[output['used?']==1].groupby('x300').size().reset_index()
-    output = pd.merge(output,temp,how='left',on='x300')
-    output.rename(columns={0:'x306'},inplace=True)
-    
-    #x307
-    output['x307'] = output['x305']-output['x306']
-    
-    #x308    
-    temp = transactions_MY[['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={'total_price':'x308'},inplace=True)
-    
-    #x309
-    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])][['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={'total_price':'x309'},inplace=True)
-    
-    #x310
-    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])][['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={'total_price':'x310'},inplace=True)
-        
-    #x311
-    temp = transactions_MY.groupby('order_dateday').size().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={0:'x311'},inplace=True)
-      
-    #x312
-    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])].groupby('order_dateday').size().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={0:'x312'},inplace=True)
-       
-    #x313
-    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])].groupby('order_dateday').size().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    output.rename(columns={0:'x313'},inplace=True)
-    
-    
-    #x314,x315,x316,317
-    output['x314'] = output['x312']/output['x311']
-    output['x315'] = output['x312']/output['x313']
-    output['x316'] = output['x306']/output['x305']
-    output['x317'] = output['x306']/output['x307']
-    
-    
-    #x318-x323
-    #combine output + voucher mechanics
-    output=pd.merge(output,voucher_mechanics,how='left',left_on='promotionid_received',right_on='promotionid_received')
-    
-    temp = output.groupby(['x300','voucher_type']).size().reset_index().pivot_table(index='x300',values=0,columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',on='x300')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x318',1:'x319',2:'x320',3:'x321',4:'x322',5:'x323'},inplace=True)
-    
-    #x324-x329
-    temp = output[output['used?']==1].groupby(['x300','voucher_type']).size().reset_index().pivot_table(index='x300',values=0,columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',on='x300')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x324',1:'x325',2:'x326',3:'x327',4:'x328',5:'x329'},inplace=True)
-    
-    #x330-x335
-    output['x330'] = output['x318']-output['x324']
-    output['x331'] = output['x319']-output['x325']
-    output['x332'] = output['x320']-output['x326']
-    output['x333'] = output['x321']-output['x327']
-    output['x334'] = output['x322']-output['x328']
-    output['x335'] = output['x323']-output['x329']
-     
-    
-    
-     
-    #combine output + voucher mechanics
-    transactions_MY=pd.merge(transactions_MY,voucher_mechanics,how='left',left_on='promotionid_used',right_on='promotionid_received')
-    
-    #x336-x341 
-    temp = transactions_MY[['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x336',1:'x337',2:'x338',3:'x339',4:'x340',5:'x341'},inplace=True)
-    
-    #x342-x347
-    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])][['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x342',1:'x343',2:'x344',3:'x345',4:'x346',5:'x347'},inplace=True)
-    
-#    #x348-x353
-#    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])][['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
-#    print(temp.head())
+#    #x304. isholiday    
+#    #x305
+#    temp = output.groupby('x300').size().reset_index()
+#    output = pd.merge(output,temp,how='left',on='x300')
+#    output.rename(columns={0:'x305'},inplace=True)
+#    
+#    #x306
+#    temp = output[output['used?']==1].groupby('x300').size().reset_index()
+#    output = pd.merge(output,temp,how='left',on='x300')
+#    output.rename(columns={0:'x306'},inplace=True)
+#    
+#    #x307
+#    output['x307'] = output['x305']-output['x306']
+#    
+#    #x308    
+#    temp = transactions_MY[['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
 #    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-#    output.rename(columns={0:'x348',1:'x349',2:'x350',3:'x351',4:'x352',5:'x353'},inplace=True)
-        
-    #x354-x359
-    temp = transactions_MY.groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x354',1:'x355',2:'x356',3:'x357',4:'x358',5:'x359'},inplace=True)
-      
-    #x360-x365
-    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])].groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-    for i in range(6):
-        if i not in list(output.columns):
-            output[i] = 0   
-    output.rename(columns={0:'x360',1:'x361',2:'x362',3:'x363',4:'x364',5:'x365'},inplace=True)
-       
-#    #x366-x371
-#    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])].groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
-#    print(temp.head())
+#    output.rename(columns={'total_price':'x308'},inplace=True)
+#    
+#    #x309
+#    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])][['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
 #    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
-#    output.rename(columns={0:'x366',1:'x367',2:'x368',3:'x369',4:'x370',5:'x371'},inplace=True)
-     
-    #x372-x377
-    for i in range(372,378):
-        output['x'+str(i)] = output['x'+str(i-18)]/output['x'+str(i-12)]
-        
-#    #x378-x383
-#    for i in range(378,384):
-#        output['x'+str(i)] = output['x'+str(i-24)]/output['x'+str(i-12)]
-    
-    #x384-x389
-    for i in range(384,390):
-        output['x'+str(i)] = output['x'+str(i-60)]/output['x'+str(i-66)]
-    
-    #x390-x395. 6 type used #/not use  x324-x329/x330-x335
-    for i in range(390,396):
-        output['x'+str(i)] = output['x'+str(i-66)]/output['x'+str(i-60)]
-    
+#    output.rename(columns={'total_price':'x309'},inplace=True)
+#    
+#    #x310
+#    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])][['order_dateday','total_price']].groupby('order_dateday').sum().reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    output.rename(columns={'total_price':'x310'},inplace=True)
+#        
+#    #x311
+#    temp = transactions_MY.groupby('order_dateday').size().reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    output.rename(columns={0:'x311'},inplace=True)
+#      
+#    #x312
+#    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])].groupby('order_dateday').size().reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    output.rename(columns={0:'x312'},inplace=True)
+#       
+#    #x313
+#    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])].groupby('order_dateday').size().reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    output.rename(columns={0:'x313'},inplace=True)
+#    
+#    
+#    #x314,x315,x316,317
+#    output['x314'] = output['x312']/output['x311']
+#    output['x315'] = output['x312']/output['x313']
+#    output['x316'] = output['x306']/output['x305']
+#    output['x317'] = output['x306']/output['x307']
+#    
+#    
+#    #x318-x323
+#    #combine output + voucher mechanics
+#    output=pd.merge(output,voucher_mechanics,how='left',left_on='promotionid_received',right_on='promotionid_received')
+#    
+#    temp = output.groupby(['x300','voucher_type']).size().reset_index().pivot_table(index='x300',values=0,columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',on='x300')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x318',1:'x319',2:'x320',3:'x321',4:'x322',5:'x323'},inplace=True)
+#    
+#    #x324-x329
+#    temp = output[output['used?']==1].groupby(['x300','voucher_type']).size().reset_index().pivot_table(index='x300',values=0,columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',on='x300')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x324',1:'x325',2:'x326',3:'x327',4:'x328',5:'x329'},inplace=True)
+#    
+#    #x330-x335
+#    output['x330'] = output['x318']-output['x324']
+#    output['x331'] = output['x319']-output['x325']
+#    output['x332'] = output['x320']-output['x326']
+#    output['x333'] = output['x321']-output['x327']
+#    output['x334'] = output['x322']-output['x328']
+#    output['x335'] = output['x323']-output['x329']
+#     
+#    
+#    
+#     
+#    #combine output + voucher mechanics
+#    transactions_MY=pd.merge(transactions_MY,voucher_mechanics,how='left',left_on='promotionid_used',right_on='promotionid_received')
+#    
+#    #x336-x341 
+#    temp = transactions_MY[['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x336',1:'x337',2:'x338',3:'x339',4:'x340',5:'x341'},inplace=True)
+#    
+#    #x342-x347
+#    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])][['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x342',1:'x343',2:'x344',3:'x345',4:'x346',5:'x347'},inplace=True)
+#    
+##    #x348-x353
+##    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])][['order_dateday','total_price','voucher_type']].groupby(['order_dateday','voucher_type']).sum().reset_index().pivot_table(index='order_dateday',values='total_price',columns='voucher_type').reset_index()
+##    print(temp.head())
+##    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+##    output.rename(columns={0:'x348',1:'x349',2:'x350',3:'x351',4:'x352',5:'x353'},inplace=True)
+#        
+#    #x354-x359
+#    temp = transactions_MY.groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x354',1:'x355',2:'x356',3:'x357',4:'x358',5:'x359'},inplace=True)
+#      
+#    #x360-x365
+#    temp = transactions_MY[pd.notnull(transactions_MY['promotionid_used'])].groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+#    for i in range(6):
+#        if i not in list(output.columns):
+#            output[i] = 0   
+#    output.rename(columns={0:'x360',1:'x361',2:'x362',3:'x363',4:'x364',5:'x365'},inplace=True)
+#       
+##    #x366-x371
+##    temp = transactions_MY[pd.isnull(transactions_MY['promotionid_used'])].groupby(['order_dateday','voucher_type']).size().reset_index().pivot_table(index='order_dateday',values=0,columns='voucher_type').reset_index()
+##    print(temp.head())
+##    output = pd.merge(output,temp,how='left',left_on='x300',right_on='order_dateday')
+##    output.rename(columns={0:'x366',1:'x367',2:'x368',3:'x369',4:'x370',5:'x371'},inplace=True)
+#     
+#    #x372-x377
+#    for i in range(372,378):
+#        output['x'+str(i)] = output['x'+str(i-18)]/output['x'+str(i-12)]
+#        
+##    #x378-x383
+##    for i in range(378,384):
+##        output['x'+str(i)] = output['x'+str(i-24)]/output['x'+str(i-12)]
+#    
+#    #x384-x389
+#    for i in range(384,390):
+#        output['x'+str(i)] = output['x'+str(i-60)]/output['x'+str(i-66)]
+#    
+#    #x390-x395. 6 type used #/not use  x324-x329/x330-x335
+#    for i in range(390,396):
+#        output['x'+str(i)] = output['x'+str(i-66)]/output['x'+str(i-60)]
+#    
     features = []
-    for i in range(297,396):
+    for i in range(297,304):
         features.append('x'+str(i))
-    
-    features.remove('x304')
-    for i in range(348,354):
-        features.remove('x'+str(i))
-    for i in range(366,372):
-        features.remove('x'+str(i))
-    for i in range(378,384):
-        features.remove('x'+str(i))
+#    for i in range(297,396):
+#        features.append('x'+str(i))
+#    
+#    features.remove('x304')
+#    for i in range(348,354):
+#        features.remove('x'+str(i))
+#    for i in range(366,372):
+#        features.remove('x'+str(i))
+#    for i in range(378,384):
+#        features.remove('x'+str(i))
         
     return output[features].fillna(0)
     
@@ -1129,23 +1137,25 @@ def generateUserFeatures_p13(query,transactions_MY,voucher_mechanics,colnameDate
     output.rename(columns={'discount':'x396','max_value':'x397','voucher_type':'x398'},inplace=True)
     
     
-    #x399
-    temp = transactions_MY_new.groupby('voucher_type').size().reset_index()
-    output = pd.merge(output,temp,how='left',left_on='x398',right_on='voucher_type')
-    output.rename(columns={0:'x399'},inplace=True)
-     
-    #x400
-    temp = output[output['used?']==1].groupby('voucher_type').size().reset_index()
-    output = pd.merge(output,temp,how='left',on='voucher_type')
-    output.rename(columns={0:'x400'},inplace=True)
-     
-    #x401,x402,x403
-    output['x401'] = output['x399'] - output['x400']    
-    output['x402'] = output['x400']/output['x399']
-    output['x403'] = output['x400']/output['x401']
+#    #x399
+#    temp = transactions_MY_new.groupby('voucher_type').size().reset_index()
+#    output = pd.merge(output,temp,how='left',left_on='x398',right_on='voucher_type')
+#    output.rename(columns={0:'x399'},inplace=True)
+#     
+#    #x400
+#    temp = output[output['used?']==1].groupby('voucher_type').size().reset_index()
+#    output = pd.merge(output,temp,how='left',on='voucher_type')
+#    output.rename(columns={0:'x400'},inplace=True)
+#     
+#    #x401,x402,x403
+#    output['x401'] = output['x399'] - output['x400']    
+#    output['x402'] = output['x400']/output['x399']
+#    output['x403'] = output['x400']/output['x401']
     
     features = []
-    for i in range(396,404):
+#    for i in range(396,404):
+#        features.append('x'+str(i))
+    for i in range(396,399):
         features.append('x'+str(i))
     
     return output[features].fillna(0)
@@ -1156,30 +1166,42 @@ def generateFeatureOfData(query,train_set,user_profiles_MY,voucher_mechanics,tra
     ''' p1-p13 '''
     print('Run p1...')
     p1 = generateUserFeatures_p1(query,user_profiles_MY)
+    print(p1.shape)
     print('Run p2...')
     p2 = generateUserFeatures_p2(query,voucher_mechanics,train_set)
+    print(p2.shape)
     print('Run p3...')
     p3 = generateUserFeatures_p3(query,transactions_MY,voucher_mechanics)
+    print(p3.shape)
     print('Run p4...')
     p4 = generateUserFeatures_p4(query,transactions_MY,voucher_mechanics)
+    print(p4.shape)
     print('Run p5...')
     p5 = generateUserFeatures_p5(query,transactions_MY,voucher_mechanics)
+    print(p5.shape)
     print('Run p6...')
     p6 = generateUserFeatures_p6(query,transactions_MY,voucher_mechanics)
+    print(p6.shape)
     print('Run p7...')
     p7 = generateUserFeatures_p7(query,transactions_MY,voucher_mechanics)
+    print(p7.shape)
     print('Run p8...')
     p8 = generateUserFeatures_p8(query,transactions_MY,voucher_mechanics,train_set)
+    print(p8.shape)
     print('Run p9...')
     p9 = generateUserFeatures_p9(query,train_set,voucher_mechanics)
+    print(p9.shape)
     print('Run p10...')
     p10 = generateUserFeatures_p10(query,view_log_0)
     print('Run p11...')
     p11 = generateUserFeatures_p11(query,voucher_distribution_active_date)
+    print(p10.shape)
     print('Run p12...')
     p12 = generateUserFeatures_p12(query,transactions_MY,voucher_mechanics)
+    print(p12.shape)
     print('Run p13...')
     p13 = generateUserFeatures_p13(query,transactions_MY,voucher_mechanics)
+    print(p13.shape)
 
     features = pd.concat([p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13],axis=1)
 

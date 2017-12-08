@@ -6,8 +6,8 @@ Created on Tue Dec  5 17:09:28 2017
 """
 
 #,Ytrain_new
-temp = Xtrain_new[selectList]
-temp['target'] = Ytrain_new.values
+temp = Xvalidate[selectList]
+temp['target'] = Yvalidate.values
     
 for i in temp.columns:
     featureid=i

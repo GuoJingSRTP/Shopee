@@ -34,11 +34,11 @@ from sklearn.model_selection import cross_val_score
 
 
 
-linear = LogisticRegression(C=500,class_weight='balanced').fit(Xtrain[selectList],Ytrain)
+linear = LogisticRegression(C=10,class_weight='balanced').fit(Xtrain_new[selectList],Ytrain_new)
 yprob = linear.predict(Xtest[selectList])
 
 
-print(cross_val_score(linear, Xvalidate[selectList], Yvalidate, cv=5))
+print(cross_val_score(linear, Xvalidate[selectList], Yvalidate, cv=5, scoring='f1'))
 
 
 con = confusion_matrix(Ytest,yprob)

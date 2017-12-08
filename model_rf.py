@@ -59,34 +59,67 @@ def runRandomForest(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     predict_prod = model.predict_proba(Xtest)[:,1]
     
     #evaluate
-    print("5 folds Cross validation on train:",cross_val_score(model, Xtrain, Ytrain, cv=5))
-    print("5 folds Cross validation on validate:",cross_val_score(model, Xvalidate, Yvalidate, cv=5))
+    print("5 folds Cross validation on train:",cross_val_score(model, Xtrain, Ytrain, cv=5, scoring='f1'))
+    print("5 folds Cross validation on validate:",cross_val_score(model, Xvalidate, Yvalidate, cv=5, scoring='f1'))
     
     con = confusion_matrix(Ytrain,train_pred)
-    print("Confusion matrix on train:",con)
+    print("train Confusion matrix on train:",con)
     
     con = confusion_matrix(Yvalidate,validate_pred)
-    print("Confusion matrix on validate:",con)
+    print("val Confusion matrix on validate:",con)
     
+    con = confusion_matrix(Ytest,predict_pred)
+    print("test Confusion matrix on validate:",con)
     
-    recall=recall_score(Ytest,predict_pred)
-    precision=precision_score(Ytest,predict_pred)
-    print('Recall:{},Precision:{}'.format(recall,precision))
+    ###########
+#    recall=recall_score(Ytest,predict_pred)
+#    precision=precision_score(Ytest,predict_pred)
+#    print('test Recall:{},Precision:{}'.format(recall,precision))
     
     precision,recall,threshold=precision_recall_curve(Ytest,predict_pred)
     plt.figure()
-    plt.step(recall, precision, color='b', alpha=0.2,
-             where='post')
-    plt.fill_between(recall, precision, step='post', alpha=0.2,
-                     color='b')
-    
+    plt.step(recall, precision, color='b', alpha=0.2,  where='post')
+    plt.fill_between(recall, precision, step='post', alpha=0.2, color='b')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
     plt.xlim([0.0, 1.0])
+    plt.title('test')
     plt.show()
     
+    ##############
+#    recall=recall_score(Yvalidate,validate_pred)
+#    precision=precision_score(Yvalidate,predict_pred)
+#    print('val Recall:{},Precision:{}'.format(recall,precision))
+    
+    
     precision,recall,threshold=precision_recall_curve(Yvalidate,validate_pred)
+#    recall=recall_score(Yvalidate,validate_pred)
+#    precision=precision_score(Yvalidate,validate_pred)
+#    print('val Recall:{},Precision:{}'.format(recall,precision))
+    
+    plt.figure()
+    plt.step(recall, precision, color='b', alpha=0.2,  where='post')
+    plt.fill_between(recall, precision, step='post', alpha=0.2,    color='b') 
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.title('val')
+    plt.show()
+    
+    
+    ##############
+#    recall=recall_score(Ytrain,train_pred)
+#    precision=precision_score(Ytrain,train_pred)
+#    print('train Recall:{},Precision:{}'.format(recall,precision))
+#    
+    
+    precision,recall,threshold=precision_recall_curve(Ytrain,train_pred)
+#    recall=recall_score(Ytrain,train_pred)
+#    precision=precision_score(Ytrain,train_pred)
+#    print('train Recall:{},Precision:{}'.format(recall,precision))
+    
     plt.figure()
     plt.step(recall, precision, color='b', alpha=0.2,
              where='post')
@@ -97,14 +130,15 @@ def runRandomForest(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest):
     plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
     plt.xlim([0.0, 1.0])
+    plt.title('train')
     plt.show()
     
     roc = roc_auc_score(Ytrain,train_prod)
-    print('AUC on train:{}'.format(roc))
+    print('train AUC on train:{}'.format(roc))
     roc = roc_auc_score(Yvalidate,validate_prod)
-    print('AUC on validate:{}'.format(roc))
+    print('val AUC on validate:{}'.format(roc))
     roc = roc_auc_score(Ytest,predict_prod)
-    print('AUC on test:{}'.format(roc))
+    print('test AUC on test:{}'.format(roc))
     
     
     
