@@ -63,6 +63,7 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     
     plt.figure()
     df.plot(kind='barh',x='name',y='score',legend=False)
+    plt.savefig('images/importance.png')
     plt.show()
     
     
@@ -112,6 +113,7 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     plt.ylim([0.0, 1.05])
     plt.xlim([0.0, 1.0])
     plt.title('validate')
+    plt.savefig('images/valPRcurve.png')
     plt.show()
     
     temp=pd.DataFrame({0:precision,1:recall})
@@ -130,6 +132,7 @@ def runXGBOOST(Xtrain,Ytrain,Xvalidate,Yvalidate,Xtest,Ytest,params):
     plt.ylim([0.0, 1.05])
     plt.xlim([0.0, 1.0])
     plt.title('train')
+    plt.savefig('images/trainPRcurve.png')
     plt.show()
     
     temp=pd.DataFrame({0:precision,1:recall})

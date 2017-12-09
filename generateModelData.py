@@ -47,8 +47,8 @@ def normalizationMinMaxScale(dataset,target,ifsplit=0):
 #target_name = 'repurchase_15?'
 #target_name = 'repurchase_30?'
 #target_name = 'repurchase_60?'
-target_name = 'repurchase_90?'
-#target_name = 'used?' '
+#target_name = 'repurchase_90?'
+target_name = 'used?' 
 
 
 print('loadData...')

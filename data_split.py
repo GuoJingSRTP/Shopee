@@ -97,7 +97,7 @@ if __name__ == '__main__':
 #    test_set_1_target.to_csv('test_set_1_target_'+test_StartDatetime+'_'+str(test_EndDatetime)+'.csv')
          
     ''' predict '''    
-#    predict_set = predict_set[predict_set['userid'].isin(common_users)]
+    #    predict_set = predict_set[predict_set['userid'].isin(common_users)]
     predict_features = generateFeatures.generateFeatureOfData(predict_set,train_set_1,user_profiles_MY,
                                                         voucher_mechanics,transactions_MY[transactions_MY['order_date'].apply(lambda x: True if x<=datetime.strptime(endDatetime,'%Y-%m-%d').date() else False)],
                                                         view_log_0,voucher_distribution_active_date,train_data)
