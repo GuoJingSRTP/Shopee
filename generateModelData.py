@@ -44,64 +44,65 @@ def normalizationMinMaxScale(dataset,target,ifsplit=0):
         
     return Xtrain,Xtest,Xvalidate,Ytrain,Ytest,Yvalidate
 
+#target_name = 'repurchase_15?'
+#target_name = 'repurchase_30?'
+#target_name = 'repurchase_60?'
+target_name = 'repurchase_90?'
+#target_name = 'used?' '
 
-#print('loadData...')
-#dataset = pd.read_csv('train_set_1_features_2017-04-01_2017-08-09.csv') #train_set_1_features #
-#target = pd.read_csv('train_set_1_target_2017-04-01_2017-08-09.csv',header=None) #train_set_1_target #
-#Xtrain,_,_,Ytrain,_,_ = normalizationMinMaxScale(dataset,target,ifsplit=0)
-#Xtrain=Xtrain.iloc[:,2:]
-#Ytrain=Ytrain[1]
-#
-#test_dataset = pd.read_csv('test_set_2_features_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
-#test_target = pd.read_csv('test_set_2_target_2017-08-10_2017-08-16.csv',header=None) #train_set_target #
-#testdata,_,_,target,_,_ = normalizationMinMaxScale(test_dataset,test_target)
-#testdata=testdata.iloc[:,2:]
-#target=target[1]
-#
-##validate_dataset = pd.read_csv('test_set_1_features_2017-08-01_2017-08-16.csv') #validate_set_1_features #train_features #
-##validate_target = pd.read_csv('test_set_1_target_2017-08-01_2017-08-16.csv',header=None) #validate_set_1_target #train_set_target #
-##Xvalidate,_,Yvalidate,_ = normalizationMinMaxScale(validate_dataset,validate_target)
-##Xvalidate=Xvalidate.iloc[:,1:]
-##Yvalidate=Yvalidate[1]
-#
-##Xtrain.fillna(0,inplace=True)
-##testdata.fillna(0,inplace=True)
-##Xvalidate.fillna(0,inplace=True)
-#
-#
-#predict_dataset = pd.read_csv('predict_features_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
-#predict_dataset,_,_,_,_,_ = normalizationMinMaxScale(predict_dataset,1)
-#predict_dataset=  predict_dataset.iloc[:,2:]
 
- 
-##############################################################################
+print('loadData...')
+dataset = pd.read_csv('train_set_2_features_'+target_name[:-2]+'_2017-04-01_2017-08-09.csv') #train_set_1_features #
+target = pd.read_csv('train_set_2_target_'+target_name[:-2]+'_2017-04-01_2017-08-09.csv',header=None) #train_set_1_target #
+Xtrain,_,_,Ytrain,_,_ = normalizationMinMaxScale(dataset,target,ifsplit=0)
+Xtrain=Xtrain.iloc[:,2:]
+Ytrain=Ytrain[1]
+
+test_dataset = pd.read_csv('test_set_2_features_'+target_name[:-2]+'_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
+test_target = pd.read_csv('test_set_2_target_'+target_name[:-2]+'_2017-08-10_2017-08-16.csv',header=None) #train_set_target #
+testdata,_,_,target,_,_ = normalizationMinMaxScale(test_dataset,test_target)
+testdata=testdata.iloc[:,2:]
+target=target[1]
+
+
+Xtrain.fillna(0,inplace=True)
+testdata.fillna(0,inplace=True)
+#Xvalidate.fillna(0,inplace=True)
+#
+#
+predict_dataset = pd.read_csv('predict_features_'+target_name[:-2]+'_2017-08-10_2017-08-16.csv') #test_set_1_features #train_features #
+predict_dataset,_,_,_,_,_ = normalizationMinMaxScale(predict_dataset,1)
+predict_dataset=  predict_dataset.iloc[:,2:]
+#
+# 
+#############################################################################
 print('Feature...')
 
 ''' select features '''
-#selectList = allCol(Xtrain)
+selectList = allCol(Xtrain)
 
 #selectList.append('x192')
 #selectList = manualSelect() + selectList
 ##selectList=removeSpecificFeatures(selectList)
-##selectList = RemoveTrain(Xtrain)
+#selectList = RemoveTrain(Xtrain)
 ##selectList = manualSelect()
 ##
 ##
-selectList=list(set(selectList))
+#selectList=list(set(selectList))
 #selectList.remove('x11')
 
 
 ''' balance data '''
-#Xtrain_new=Xtrain
-#Ytrain_new=Ytrain
+Xtrain_new=Xtrain
+Ytrain_new=Ytrain
 #
 #
 ### the most stupid balance method.... lose the information in negative samples
-#temp = Xtrain.copy()
-#temp['target'] = Ytrain.values
-#temp = pd.concat([temp[temp['target']==0].sample(n=int(sum(Ytrain)*8)),temp[temp['target']==1]])
-#Xtrain_new = temp.iloc[:,:-1]
-#Ytrain_new = temp.iloc[:,-1]
+temp = Xtrain.copy()
+temp['target'] = Ytrain.values
+temp = pd.concat([temp[temp['target']==0].sample(n=int(sum(Ytrain)*8)),temp[temp['target']==1]])
+Xtrain_new = temp.iloc[:,:-1]
+Ytrain_new = temp.iloc[:,-1]
 
 
 #''' time consuming '''
@@ -135,16 +136,16 @@ selectList=list(set(selectList))
 ''' train model '''
 #params
 params={
-        'eta':0.1, #0.05-0.3 0.1
-        'max_depth':3, #3-10 xxx 
-        'subsample':0.3, #xxx
-        'gamma':10, #xxx
+        'eta':0.3, #0.05-0.3 0.1
+        'max_depth':8, #3-10 xxx 
+        'subsample':0.7, #xxx
+        'gamma':50, #xxx
         'colsample_bytree':0.3, #xxx
-        'lambda':1,
+        'lambda':10,
         'alpha':1, 
         'silent':1,
         'verbose_eval':True,
-        'max_delta_step': 8,
+        'max_delta_step': 1,
         'scale_pos_weight': 1,
         'objective': 'binary:logistic',
         'eval_metric': ['map'], #auc
@@ -157,7 +158,7 @@ params={
 print('Train...')
 model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
                            target,testdata[selectList],target,
-                           opt_param)
+                           params)
 #opt_param
 
 #model_LR = runLR(Xtrain_new[selectList],Ytrain_new,testdata[selectList],
@@ -173,7 +174,7 @@ model_xgboost,f1 = runXGBOOST(Xtrain_new[selectList],Ytrain_new,testdata[selectL
 ''' predict '''
 #modelTest(model_rf,predict_dataset[selectList],target_name='used')
 
-#modelTest(model_xgboost,predict_dataset[selectList],target_name='used')
+modelTest(model_xgboost,predict_dataset[selectList],target_name=target_name[:-2])
 
 #modelTest(model_xgboost,testdata[selectList],target_name='used')
 

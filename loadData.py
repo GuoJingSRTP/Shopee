@@ -3,8 +3,8 @@ import numpy as np
 from datetime import datetime
 
 if __name__ == '__main__':
-    train_data = pd.read_csv('E:\\shopee\\training.csv')
-    predict_data = pd.read_csv('E:\\shopee\\predict.csv')
+    train_data = pd.read_csv('../training.csv')
+    predict_data = pd.read_csv('../predict.csv')
     
     
     #add date time to train_data and predict_data
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     predict_data['voucher_received_date'] = [datetime.fromtimestamp(i).date() for i in predict_data['voucher_received_time']] 
     
     #load tables
-    user_profiles_MY = pd.read_csv('E:\\shopee\\user_profiles_MY.csv')
+    user_profiles_MY = pd.read_csv('../user_profiles_MY.csv')
     user_profiles_MY['unixtime'] =[datetime.strptime(i, "%Y-%m-%d %H:%M:%S").timestamp() for i in user_profiles_MY['registration_time']]
     user_profiles_MY['datetime'] =[datetime.strptime(i, "%Y-%m-%d %H:%M:%S") for i in user_profiles_MY['registration_time']]
     user_profiles_MY.replace(to_replace={'gender': {np.nan: 0}},inplace=True)
@@ -25,14 +25,14 @@ if __name__ == '__main__':
        
     
     
-    voucher_mechanics = pd.read_csv('E:\\shopee\\voucher_mechanics.csv')
+    voucher_mechanics = pd.read_csv('../voucher_mechanics.csv')
     voucher_type = voucher_mechanics[['discount','max_value']].drop_duplicates()
     voucher_type.reset_index(inplace=True)
     voucher_type.set_index(['discount','max_value'],inplace=True)
     voucher_mechanics['voucher_type']=[voucher_type.loc[row['discount'],row['max_value']]['index'] for i,row in voucher_mechanics.iterrows()]
     
     
-    transactions_MY = pd.read_csv('E:\\shopee\\transactions_MY.csv')
+    transactions_MY = pd.read_csv('../transactions_MY.csv')
     transactions_MY['order_datetime'] =[datetime.fromtimestamp(i) for i in transactions_MY['order_time']]
     transactions_MY['order_dateday'] = transactions_MY['order_datetime'].apply(lambda x: x.day)
     transactions_MY['order_dateyear'] = transactions_MY['order_datetime'].apply(lambda x: x.year)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     transactions_MY = transactions_MY[transactions_MY['order_dateyear']>2016]
 
     
-    view_log_0 = pd.read_csv('E:\\shopee\\view_log.csv')
+    view_log_0 = pd.read_csv('../view_log.csv')
 #    '''generate view_log '''
 #    view_log_0 = pd.read_csv('view_log_0.csv')
 #
@@ -83,6 +83,6 @@ if __name__ == '__main__':
 #        view_log_0=pd.merge(view_log_0,df,how='left',left_on=['userid','voucher_received_dateStamp'],right_on=['userid','temp_date'])
 #        view_log_0.drop('temp_date',axis=1,inplace=True)
     
-    voucher_distribution_active_date = pd.read_csv('E:\\shopee\\voucher_distribution_active_date.csv')
+    voucher_distribution_active_date = pd.read_csv('../voucher_distribution_active_date.csv')
 
                   

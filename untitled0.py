@@ -22,4 +22,23 @@ from imblearn.under_sampling import CondensedNearestNeighbour
 
 # Apply Condensed Nearest Neighbours
 cnn = CondensedNearestNeighbour(return_indices=True)
-Xtrain_new, Ytrain_new, idx_resampled = cnn.fit_sample(Xtrain[['x1','x2']], Ytrain)
+#Xtrain_new, Ytrain_new, idx_resampled = cnn.fit_sample(Xtrain[selectList].iloc[:100,:], Ytrain.iloc[:100])
+
+from imblearn.combine import SMOTETomek
+smote_tomek = SMOTETomek(random_state=0)
+
+Xtrain_new, Ytrain_new, _= cnn.fit_sample(Xtrain[selectList].iloc[:400,:], Ytrain.iloc[:400])
+Xtrain_new =pd.DataFrame(Xtrain_new)
+Ytrain_new =pd.DataFrame(Ytrain_new)
+
+
+for i in range(800,Xtrain.shape[0],400): #Xtrain.shape[0]  36279
+    X_resampled, y_resampled , _= cnn.fit_sample(Xtrain[selectList].iloc[(i-400):i,:], Ytrain.iloc[(i-400):i])
+    Xtrain_new = pd.concat([Xtrain_new.reset_index(drop=True),pd.DataFrame(X_resampled).reset_index(drop=True)],axis=0)
+    Ytrain_new = pd.concat([Ytrain_new.reset_index(drop=True),pd.DataFrame(y_resampled).reset_index(drop=True)],axis=0)
+    
+    print(len(Ytrain_new)/Ytrain_new.sum(),len(Ytrain_new))
+
+Xtrain_new.columns=selectList
+
+

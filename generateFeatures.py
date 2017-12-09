@@ -21,8 +21,12 @@ from datetime import timedelta
 '''
 #from dateutil import relativedelta
 
-target_name = 'used?' #'repurchase_15?', 'repurchase_30?',
-#       'repurchase_60?', 'repurchase_90?'
+#target_name = 'repurchase_15?'
+#target_name = 'repurchase_30?'
+#target_name = 'repurchase_60?'
+target_name = 'repurchase_90?'
+#target_name = 'used?' 
+
 
 def generateUserFeatures_p1(query,user_profiles_MY,Timecolname='voucher_received_datetime'): 
     #x5, x6, x7
@@ -35,7 +39,7 @@ def generateUserFeatures_p1(query,user_profiles_MY,Timecolname='voucher_received
     #x1-x3 
     output['x1'] = output[Timecolname].apply(lambda x: x.year) - output['datetime'].apply(lambda x: x.year)
     output['x2'] = 12*output['x1'] + output[Timecolname].apply(lambda x: x.month) - output['datetime'].apply(lambda x: x.month)
-    output['x3'] = output[Timecolname]-output['datetime']
+    output['x3'] = output[Timecolname].subtract(output['datetime'])
     output['x3'] = output['x3'].apply(lambda x: x.days)
     
     return output[['userid','x1','x2','x3','x4','x5','x6','x7']] #same as query
@@ -1178,7 +1182,9 @@ def generateUserFeatures_p13(query,train_set,transactions_MY,voucher_mechanics,c
     
     
    
-def generateFeatureOfData(query,train_set,user_profiles_MY,voucher_mechanics,transactions_MY,view_log_0,voucher_distribution_active_date):
+def generateFeatureOfData(query,train_set,user_profiles_MY,voucher_mechanics,
+                          transactions_MY,view_log_0,voucher_distribution_active_date,
+                          train_data):
     ''' p1-p13 '''
     print('Run p1...')
     p1 = generateUserFeatures_p1(query,user_profiles_MY)
@@ -1214,10 +1220,10 @@ def generateFeatureOfData(query,train_set,user_profiles_MY,voucher_mechanics,tra
     p11 = generateUserFeatures_p11(query,voucher_distribution_active_date)
     print(p11.shape)
     print('Run p12...')
-    p12 = generateUserFeatures_p12(query,train_set,transactions_MY,voucher_mechanics)
+    p12 = generateUserFeatures_p12(query,train_data,transactions_MY,voucher_mechanics)
     print(p12.shape)
     print('Run p13...')
-    p13 = generateUserFeatures_p13(query,train_set,transactions_MY,voucher_mechanics)
+    p13 = generateUserFeatures_p13(query,train_data,transactions_MY,voucher_mechanics)
     print(p13.shape)
     
     features = pd.concat([p1.reset_index(drop=True),p2.reset_index(drop=True),
