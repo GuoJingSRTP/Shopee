@@ -145,10 +145,11 @@ params={
         'alpha':1, 
         'silent':1,
         'verbose_eval':True,
-        'max_delta_step': 1,
-        'scale_pos_weight': 1,
+        'max_delta_step': 1, #1-10
+        'scale_pos_weight': 1, #sum(negative cases) / sum(positive cases) 
         'objective': 'binary:logistic',
-        'eval_metric': ['map'], #auc
+        'eval_metric': ['map'], #auc error  Mean average precision
+        'min_child_weight': 10, # default 1   larger underfitting
         'seed':12
         }
 
